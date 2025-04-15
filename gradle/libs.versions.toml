@@ -10,11 +10,10 @@ activityCompose = "1.10.1"
 composeBom = "2024.04.01"
 kotlinxCoroutinesCore = "1.10.1"
 kotlinxCoroutinesAndroid = "1.10.1"
-roomRuntime = "2.6.1"
-roomKtx = "2.6.1"
+roomRuntime = "2.7.0"
+roomKtx = "2.7.0"
 navigationCompose = "2.8.9"
 daggerVersion = "2.56.1"
-daggerCompilerVersion = "2.55"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,7 +37,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 dagger = { module = "com.google.dagger:dagger", version.ref = "daggerVersion" }
-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "daggerCompilerVersion" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "daggerVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
