@@ -3,6 +3,7 @@ package com.xaarlox.notelist.di
 import android.app.Application
 import com.xaarlox.notelist.NoteApp
 import com.xaarlox.notelist.feature_note.presentation.MainActivity
+import com.xaarlox.notelist.feature_note.presentation.notes.NotesViewModelFactory
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -17,4 +18,5 @@ interface AppComponent {
 
     fun inject(app: NoteApp)
     fun inject(activity: MainActivity)
+    fun notesViewModelFactory(): NotesViewModelFactory
 }
