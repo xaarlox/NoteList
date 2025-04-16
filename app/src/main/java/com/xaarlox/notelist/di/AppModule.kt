@@ -7,6 +7,7 @@ import com.xaarlox.notelist.feature_note.data.repository.NoteRepositoryImpl
 import com.xaarlox.notelist.feature_note.domain.repository.NoteRepository
 import com.xaarlox.notelist.feature_note.domain.use_case.AddNote
 import com.xaarlox.notelist.feature_note.domain.use_case.DeleteNote
+import com.xaarlox.notelist.feature_note.domain.use_case.GetNote
 import com.xaarlox.notelist.feature_note.domain.use_case.GetNotes
 import com.xaarlox.notelist.feature_note.domain.use_case.NoteUseCases
 import com.xaarlox.notelist.feature_note.presentation.notes.NotesViewModelFactory
@@ -37,7 +38,8 @@ class AppModule {
         return NoteUseCases(
             getNotes = GetNotes(repository),
             deleteNote = DeleteNote(repository),
-            addNote = AddNote(repository)
+            addNote = AddNote(repository),
+            getNote = GetNote(repository)
         )
     }
 
