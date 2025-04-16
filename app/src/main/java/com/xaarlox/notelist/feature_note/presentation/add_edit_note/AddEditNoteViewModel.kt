@@ -10,22 +10,15 @@ import androidx.lifecycle.viewModelScope
 import com.xaarlox.notelist.feature_note.domain.model.InvalidNoteException
 import com.xaarlox.notelist.feature_note.domain.model.Note
 import com.xaarlox.notelist.feature_note.domain.use_case.NoteUseCases
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AddEditNoteViewModel @AssistedInject constructor(
+class AddEditNoteViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases,
-    @Assisted private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(savedStateHandle: SavedStateHandle): AddEditNoteViewModel
-    }
 
     private val _noteTitle = mutableStateOf(
         NoteTextFieldState(
