@@ -22,5 +22,5 @@ interface AppComponent {
     fun inject(activity: MainActivity)
     fun noteUseCases(): NoteUseCases
     fun notesViewModelFactory(): NotesViewModelFactory
-    fun addEditNoteViewModelFactory(): AddEditNoteViewModelFactory
+    fun addEditNoteViewModelFactory(): AddEditNoteViewModelFactory.Factory
 }
