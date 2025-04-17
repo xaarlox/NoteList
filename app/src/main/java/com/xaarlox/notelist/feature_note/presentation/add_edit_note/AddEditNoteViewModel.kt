@@ -13,6 +13,9 @@ import com.xaarlox.notelist.feature_note.domain.use_case.NoteUseCases
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 class AddEditNoteViewModel @Inject constructor(
@@ -37,10 +40,21 @@ class AddEditNoteViewModel @Inject constructor(
     private val _noteColor = mutableIntStateOf(Note.noteColors.random().toArgb())
     val noteColor: State<Int> get() = _noteColor
 
+    private val _noteDate = mutableStateOf(
+        NoteTextFieldState(
+            hint = "Enter date...",
+            text = formatDate(System.currentTimeMillis())
+        )
+    )
+    val noteDate: State<NoteTextFieldState> = _noteDate
+
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     private var currentNoteId: Int? = null
+
+    private var isDateManuallyChanged = false
+    private var isNoteChanged = false
 
     init {
         savedStateHandle.get<Int>("noteId")?.let { noteId ->
@@ -53,6 +67,9 @@ class AddEditNoteViewModel @Inject constructor(
                         _noteContent.value =
                             noteContent.value.copy(text = note.content, isHintVisible = false)
                         _noteColor.intValue = note.color
+                        _noteDate.value =
+                            noteDate.value.copy(text = formatDate(note.date), isHintVisible = false)
+                        isDateManuallyChanged = false
                     }
                 }
             }
@@ -63,8 +80,9 @@ class AddEditNoteViewModel @Inject constructor(
         when (event) {
             is AddEditNoteEvent.EnteredTitle -> {
                 _noteTitle.value = noteTitle.value.copy(
-                    text = event.value
+                    text = event.value,
                 )
+                isNoteChanged = true
             }
 
             is AddEditNoteEvent.ChangeTitleFocus -> {
@@ -77,6 +95,7 @@ class AddEditNoteViewModel @Inject constructor(
                 _noteContent.value = noteContent.value.copy(
                     text = event.value
                 )
+                isNoteChanged = true
             }
 
             is AddEditNoteEvent.ChangeContentFocus -> {
@@ -87,16 +106,35 @@ class AddEditNoteViewModel @Inject constructor(
 
             is AddEditNoteEvent.ChangeColor -> {
                 _noteColor.intValue = event.color
+                isNoteChanged = true
+            }
+
+            is AddEditNoteEvent.EnteredDate -> {
+                isDateManuallyChanged = true
+                _noteDate.value = noteDate.value.copy(
+                    text = event.value
+                )
+            }
+
+            is AddEditNoteEvent.ChangeDateFocus -> {
+                _noteDate.value = noteDate.value.copy(
+                    isHintVisible = !event.focusState.isFocused && noteDate.value.text.isBlank()
+                )
             }
 
             is AddEditNoteEvent.SaveNote -> {
                 viewModelScope.launch {
                     try {
+                        val finalDate = when {
+                            isDateManuallyChanged -> parseDate(noteDate.value.text)
+                            isNoteChanged -> System.currentTimeMillis()
+                            else -> parseDate(noteDate.value.text)
+                        }
                         noteUseCases.addNote(
                             Note(
                                 title = noteTitle.value.text,
                                 content = noteContent.value.text,
-                                date = System.currentTimeMillis(),
+                                date = finalDate,
                                 color = noteColor.value,
                                 id = currentNoteId
                             )
@@ -117,5 +155,19 @@ class AddEditNoteViewModel @Inject constructor(
     sealed class UiEvent {
         data class ShowSnackBar(val message: String) : UiEvent()
         object SaveNote : UiEvent()
+    }
+
+    private fun formatDate(timestamp: Long): String {
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        return formatter.format(Date(timestamp))
+    }
+
+    private fun parseDate(dateStr: String): Long {
+        return try {
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            formatter.parse(dateStr)?.time ?: System.currentTimeMillis()
+        } catch (exception: Exception) {
+            System.currentTimeMillis()
+        }
     }
 }
