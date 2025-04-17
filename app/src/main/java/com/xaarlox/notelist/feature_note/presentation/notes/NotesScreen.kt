@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,28 +28,33 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.xaarlox.notelist.feature_note.domain.model.Note
 import com.xaarlox.notelist.feature_note.presentation.notes.components.NoteItem
 import com.xaarlox.notelist.feature_note.presentation.notes.components.OrderSection
 import com.xaarlox.notelist.feature_note.presentation.util.Screen
@@ -67,6 +73,11 @@ fun NotesScreen(
     val scaffoldState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var noteToDelete by remember { mutableStateOf<Note?>(null) }
+
+    var deletingNoteId by remember { mutableStateOf<Int?>(null) }
+
     val infiniteTransition = rememberInfiniteTransition()
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -79,6 +90,49 @@ fun NotesScreen(
         targetValue = Pink80,
         animationSpec = infiniteRepeatable(animation = tween(3000), repeatMode = RepeatMode.Reverse)
     )
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                noteToDelete = null
+            },
+            title = { Text("Delete Note") },
+            text = { Text("Are you sure you want to delete this note?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    noteToDelete?.let { note ->
+                        deletingNoteId = note.id
+                        scope.launch {
+                            delay(300)
+                            viewModel.onEvent(NotesEvent.DeleteNote(note))
+                            val result = scaffoldState.showSnackbar(
+                                message = "Note deleted",
+                                actionLabel = "Undo",
+                                duration = SnackbarDuration.Long,
+                                withDismissAction = true
+                            )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                viewModel.onEvent(NotesEvent.RestoreNote)
+                            }
+                        }
+                    }
+                    showDeleteDialog = false
+                    noteToDelete = null
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    noteToDelete = null
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(floatingActionButton = {
         FloatingActionButton(
@@ -103,7 +157,7 @@ fun NotesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Your note", style = MaterialTheme.typography.headlineMedium)
+                Text(text = "Your notes", style = MaterialTheme.typography.headlineMedium)
                 IconButton(onClick = {
                     viewModel.onEvent(NotesEvent.ToggleOrderSection)
                 }) {
@@ -133,12 +187,20 @@ fun NotesScreen(
                         isVisible.value = true
                     }
 
+                    LaunchedEffect(deletingNoteId) {
+                        if (deletingNoteId == note.id) {
+                            isVisible.value = false
+                        }
+                    }
+
                     AnimatedVisibility(
                         visible = isVisible.value,
                         enter = slideInVertically(animationSpec = tween(durationMillis = 800)) + fadeIn(
                             animationSpec = tween(800)
                         ),
-                        exit = slideOutVertically(animationSpec = tween(durationMillis = 300)) + fadeOut(
+                        exit = slideOutHorizontally(
+                            animationSpec = tween(durationMillis = 300),
+                            targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut(
                             animationSpec = tween(300)
                         )
                     ) {
@@ -149,15 +211,8 @@ fun NotesScreen(
                                     Screen.AddEditNoteScreen.route + "?noteId=${note.id}&noteColor=${note.color}"
                                 )
                             }, onDeleteClick = {
-                            viewModel.onEvent(NotesEvent.DeleteNote(note))
-                            scope.launch {
-                                val result = scaffoldState.showSnackbar(
-                                    message = "Note deleted", actionLabel = "Undo"
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    viewModel.onEvent(NotesEvent.RestoreNote)
-                                }
-                            }
+                            noteToDelete = note
+                            showDeleteDialog = true
                         })
                     }
                     Spacer(modifier = Modifier.height(16.dp))
