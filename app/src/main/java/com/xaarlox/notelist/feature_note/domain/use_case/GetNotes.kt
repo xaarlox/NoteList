@@ -15,6 +15,7 @@ class GetNotes(private val repository: NoteRepository) {
                     when (noteOrder) {
                         is NoteOrder.Title -> notes.sortedBy { it.title.lowercase() }
                         is NoteOrder.Date -> notes.sortedBy { it.date }
+                        is NoteOrder.Color -> notes.sortedBy { it.color }
                     }
                 }
 
@@ -22,6 +23,7 @@ class GetNotes(private val repository: NoteRepository) {
                     when (noteOrder) {
                         is NoteOrder.Title -> notes.sortedByDescending { it.title.lowercase() }
                         is NoteOrder.Date -> notes.sortedByDescending { it.date }
+                        is NoteOrder.Color -> notes.sortedByDescending { it.color }
                     }
                 }
             }

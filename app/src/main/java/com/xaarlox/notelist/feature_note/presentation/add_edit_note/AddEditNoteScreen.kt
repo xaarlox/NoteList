@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -35,7 +36,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.xaarlox.notelist.feature_note.domain.model.Note
 import com.xaarlox.notelist.feature_note.presentation.add_edit_note.components.TransparentHintTextField
@@ -44,11 +44,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditNoteScreen(
-    navController: NavController,
-    noteColor: Int,
-    viewModelFactory: AddEditNoteViewModelFactory
+    navController: NavController, noteColor: Int, viewModel: AddEditNoteViewModel
 ) {
-    val viewModel: AddEditNoteViewModel = viewModel(factory = viewModelFactory)
     val titleState = viewModel.noteTitle.value
     val contentState = viewModel.noteContent.value
 
@@ -72,18 +69,15 @@ fun AddEditNoteScreen(
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    viewModel.onEvent(AddEditNoteEvent.SaveNote)
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Save note")
-            }
-        },
-        snackbarHost = { SnackbarHost(scaffoldState) }
-    ) { paddingValues ->
+    Scaffold(floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+                viewModel.onEvent(AddEditNoteEvent.SaveNote)
+            }, shape = RoundedCornerShape(16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Save note")
+        }
+    }, snackbarHost = { SnackbarHost(scaffoldState) }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,29 +93,25 @@ fun AddEditNoteScreen(
             ) {
                 Note.noteColors.forEach { color ->
                     val colorInt = color.toArgb()
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .shadow(15.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(color)
-                            .border(
-                                width = 3.dp,
-                                color = if (viewModel.noteColor.value == colorInt) {
-                                    Color.Black
-                                } else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .clickable {
-                                scope.launch {
-                                    noteBackgroundAnimatable.animateTo(
-                                        targetValue = Color(colorInt),
-                                        animationSpec = tween(durationMillis = 500)
-                                    )
-                                }
-                                viewModel.onEvent(AddEditNoteEvent.ChangeColor(colorInt))
+                    Box(modifier = Modifier
+                        .size(50.dp)
+                        .shadow(15.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(color)
+                        .border(
+                            width = 3.dp, color = if (viewModel.noteColor.value == colorInt) {
+                                Color.Black
+                            } else Color.Transparent, shape = CircleShape
+                        )
+                        .clickable {
+                            scope.launch {
+                                noteBackgroundAnimatable.animateTo(
+                                    targetValue = Color(colorInt),
+                                    animationSpec = tween(durationMillis = 500)
+                                )
                             }
-                    )
+                            viewModel.onEvent(AddEditNoteEvent.ChangeColor(colorInt))
+                        })
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
