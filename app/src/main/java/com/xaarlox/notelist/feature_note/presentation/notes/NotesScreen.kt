@@ -52,8 +52,8 @@ import androidx.navigation.NavController
 import com.xaarlox.notelist.feature_note.presentation.notes.components.NoteItem
 import com.xaarlox.notelist.feature_note.presentation.notes.components.OrderSection
 import com.xaarlox.notelist.feature_note.presentation.util.Screen
-import com.xaarlox.notelist.ui.theme.RedOrange
-import com.xaarlox.notelist.ui.theme.Violet
+import com.xaarlox.notelist.ui.theme.Pink80
+import com.xaarlox.notelist.ui.theme.Purple40
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -75,8 +75,8 @@ fun NotesScreen(
     )
 
     val color by infiniteTransition.animateColor(
-        initialValue = RedOrange,
-        targetValue = Violet,
+        initialValue = Purple40,
+        targetValue = Pink80,
         animationSpec = infiniteRepeatable(animation = tween(3000), repeatMode = RepeatMode.Reverse)
     )
 
