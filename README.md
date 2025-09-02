@@ -46,5 +46,20 @@ NoteList is a simple, fast Android application for creating and managing persona
 4. Run on device or emulator.
 
 
+### Screenshots
+Below you can see the main interface and functionality of the NoteList app:
+
+| Notes List | Note Details |
+|------------| -------------|
+| <img src="https://github.com/user-attachments/assets/2dd1a2ea-0dd5-4164-a6eb-e5828cb94a3f" width="250"/> | <img src="https://github.com/user-attachments/assets/53146e77-bf16-4373-a5b2-b155b40292d4" width="250"/> | 
+| *Notes list with sorting*. | *Note view with color picker*. |
+
+
+| Delete Confirmation | Undo Snackbar |
+|---------------------|---------------|
+| <img src="https://github.com/user-attachments/assets/5dcf982f-fe14-4210-b8e0-3b1109884f88" width="250"/> | <img src="https://github.com/user-attachments/assets/00aa706a-cf24-4619-8cee-96115d167438" width="250"/> |
+| *Confirm delete dialog*. | *"Note deleted" with Undo*. |
+
+
 ### License
 Personal project for educational and portfolio purposes.
